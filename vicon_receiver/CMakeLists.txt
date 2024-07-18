@@ -25,9 +25,11 @@ find_package(ament_cmake REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(Boost REQUIRED COMPONENTS thread)
+find_package(std_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Position.msg"
+  DEPENDENCIES std_msgs
 )
 
 ament_export_dependencies(rosidl_default_runtime)
@@ -41,9 +43,11 @@ find_package("${rmw_implementation}" REQUIRED)
 get_rmw_typesupport(typesupport_impls "${rmw_implementation}" LANGUAGE "cpp")
 
 foreach(typesupport_impl ${typesupport_impls})
-  rosidl_target_interfaces(vicon_client
-    ${PROJECT_NAME} "rosidl_typesupport_cpp"
-  )
+  rosidl_get_typesupport_target(typesupport_target ${PROJECT_NAME} ${typesupport_impl})
+  target_link_libraries(vicon_client ${typesupport_target})
+  # rosidl_target_interfaces(vicon_client
+    # ${PROJECT_NAME} ${typesupport_impl}
+  # )
 endforeach()
 
 install(TARGETS vicon_client DESTINATION lib/${PROJECT_NAME})
